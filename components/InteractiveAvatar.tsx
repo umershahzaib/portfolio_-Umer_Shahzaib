@@ -84,12 +84,13 @@ export default function InteractiveAvatar({ videoSrc, posterSrc, className = '' 
   }, [])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: Event) => {
+      const mouseEvent = e as MouseEvent
       if (!avatarContainerRef.current) return
 
       const rect = avatarContainerRef.current.getBoundingClientRect()
-      const mouseX = e.clientX - rect.left
-      const mouseY = e.clientY - rect.top
+      const mouseX = mouseEvent.clientX - rect.left
+      const mouseY = mouseEvent.clientY - rect.top
 
       // Calculate target positions for both pupils
       ;['left', 'right'].forEach((eye) => {
@@ -167,7 +168,7 @@ export default function InteractiveAvatar({ videoSrc, posterSrc, className = '' 
       rafRef.current = requestAnimationFrame(animate)
     }
 
-    const heroSection = document.querySelector('#home')
+    const heroSection = document.querySelector('#home') as HTMLElement | null
     if (heroSection) {
       heroSection.addEventListener('mousemove', handleMouseMove)
       heroSection.addEventListener('mouseleave', handleMouseLeave)
