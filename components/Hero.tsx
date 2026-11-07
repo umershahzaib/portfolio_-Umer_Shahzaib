@@ -24,11 +24,11 @@ export default function Hero() {
             key={i}
             className="absolute w-1 h-1 bg-neon-blue/30 rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
             }}
             animate={{
-              y: [null, -100, window.innerHeight + 100],
+              y: [null, -100, (typeof window !== 'undefined' ? window.innerHeight : 1080) + 100],
               opacity: [0, 1, 0],
             }}
             transition={{
