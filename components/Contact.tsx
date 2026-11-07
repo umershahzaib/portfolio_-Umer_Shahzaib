@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Github, Linkedin, Mail, Send } from 'lucide-react'
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -10,12 +11,47 @@ export default function Contact() {
     email: '',
     message: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Form submission logic would go here
-    alert('Thank you for your message! I will get back to you soon.')
-    setFormData({ name: '', email: '', message: '' })
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_cxxcxj4'
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID'
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY'
+
+      // Send email using EmailJS
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+          to_email: 'umershahjpi18@gmail.com',
+        },
+        publicKey
+      )
+
+      setSubmitStatus('success')
+      setFormData({ name: '', email: '', message: '' })
+
+      // Reset success message after 5 seconds
+      setTimeout(() => setSubmitStatus('idle'), 5000)
+    } catch (error) {
+      console.error('EmailJS Error:', error)
+      setSubmitStatus('error')
+
+      // Reset error message after 5 seconds
+      setTimeout(() => setSubmitStatus('idle'), 5000)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const socialLinks = [
@@ -122,11 +158,33 @@ export default function Contact() {
 
               <button
                 type="submit"
-                className="interactive w-full px-8 py-3 bg-neon-blue text-dark-bg font-semibold rounded-lg hover:bg-neon-blue/90 transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(0,217,255,0.5)]"
+                disabled={isSubmitting}
+                className="interactive w-full px-8 py-3 bg-neon-blue text-dark-bg font-semibold rounded-lg hover:bg-neon-blue/90 transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(0,217,255,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
                 <Send size={18} />
               </button>
+
+              {/* Success/Error Messages */}
+              {submitStatus === 'success' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-green-500/10 border border-green-500/50 rounded-lg text-green-500 text-center"
+                >
+                  ✓ Message sent successfully! I'll get back to you soon.
+                </motion.div>
+              )}
+
+              {submitStatus === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-center"
+                >
+                  ✗ Failed to send message. Please try again or email me directly.
+                </motion.div>
+              )}
             </form>
           </motion.div>
 
